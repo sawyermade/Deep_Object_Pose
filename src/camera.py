@@ -18,13 +18,28 @@ from sensor_msgs.msg import Image as Image_msg
 import numpy as np
 import cv2
 
-# Global variables
-cam_index = 0  # index of camera to capture
-topic = '/dope/webcam_rgb_raw'  # topic for publishing
-cap = cv2.VideoCapture(cam_index)
-if not cap.isOpened():
-    print("ERROR:  Unable to open camera for capture.  Is camera plugged in?")
-    exit(1)
+# My imports
+import pyrealsense2 as rs
+
+# My globals for realsense 2
+cam_name = 'realsense_d435'
+topic = f'/dope/{cam_name}'
+pipeline = None 
+profile = None
+
+def start_realsense():
+    global pipeline, profile
+    # Sets capture parameters
+    width, height, fps = 640, 480, 30
+
+    # Sets up realsense pipeline and config
+    pipeline = rs.pipeline()
+    config = rs.config()
+    config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
+    profile = pipeline.start(config)
+
+    # Returns pipeline and profile
+    return [pipeline, profile]
     
 def publish_images(freq=5):
     rospy.init_node('dope_webcam_rgb_raw', anonymous=True)
@@ -32,15 +47,18 @@ def publish_images(freq=5):
     rate = rospy.Rate(freq)
 
     print ("Publishing images from camera {} to topic '{}'...".format(
-            cam_index, 
+            cam_name, 
             topic
             )
     )
     print ("Ctrl-C to stop")
     while not rospy.is_shutdown():
-        ret, frame = cap.read()
+        # Gets color frame from realsense
+        frames = pipeline.wait_for_frames()
+        frame_color = frames.get_color_frame()
+        frame = np.asanyarray(frame_color.get_data())
 
-        if ret:
+        if frames:
             msg_frame_edges = CvBridge().cv2_to_imgmsg(frame, "bgr8")
             images_out.publish(msg_frame_edges)
 
@@ -49,6 +67,7 @@ def publish_images(freq=5):
 if __name__ == "__main__":
     
     try :
+        start_realsense()
         publish_images()
     except rospy.ROSInterruptException:
         pass

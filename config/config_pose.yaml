@@ -26,7 +26,7 @@ dimensions: {
 
 draw_colors: {
   "cracker": [13, 255, 128],  # green
-  "gelatin": [255, 255, 255],  # while
+  "gelatin": [255, 255, 255],  # white
   "meat": [0, 104, 255],  # blue
   "mustard": [217,12, 232],  # magenta
   "soup": [255, 101, 0],  # orange

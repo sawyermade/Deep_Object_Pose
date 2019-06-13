@@ -23,7 +23,7 @@ import pyrealsense2 as rs
 
 # My globals for realsense 2
 cam_name = 'realsense_d435'
-topic = f'/dope/{cam_name}'
+topic = '/dope/{}'.format(cam_name)
 pipeline = None 
 profile = None
 

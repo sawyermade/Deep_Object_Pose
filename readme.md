@@ -23,27 +23,27 @@ This is the official DOPE ROS package for detection and 6-DoF pose estimation of
    
 2. **Create a catkin workspace** (if you do not already have one). To create a catkin workspace, follow these [instructions](http://wiki.ros.org/catkin/Tutorials/create_a_workspace):
      ```
-     $ mkdir -p ~/catkin_ws/src   # Replace `catkin_ws` with the name of your workspace
-     $ cd ~/catkin_ws/
-     $ catkin_make
+     mkdir -p ~/catkin_ws/src   # Replace `catkin_ws` with the name of your workspace
+     cd ~/catkin_ws/
+     catkin_make
      ```
 
 3. **Download the DOPE code**
      ```
-     $ cd ~/catkin_ws/src
-     $ git clone https://github.com/NVlabs/Deep_Object_Pose.git dope
+     cd ~/catkin_ws/src
+     git clone https://github.com/sawyermade/Deep_Object_Pose.git dope
      ```
 
 4. **Install dependencies**
      ```
-     $ cd ~/catkin_ws/src/dope
-     $ pip install -r requirements.txt
+     cd ~/catkin_ws/src/dope
+     pip install -r requirements.txt
      ```
 
 5. **Build**
      ```
-     $ cd ~/catkin_ws
-     $ catkin_make
+     cd ~/catkin_ws
+     catkin_make
      ``` 
 
 6. **Download [the weights](https://drive.google.com/open?id=1DfoA3m_Bm0fW8tOWXGVxi4ETlLEAgmcg)** and save them to the `weights` folder, *i.e.*, `~/catkin_ws/src/dope/weights/`.
@@ -53,14 +53,14 @@ This is the official DOPE ROS package for detection and 6-DoF pose estimation of
 
 1. **Start ROS master**
       ```
-      $ cd ~/catkin_ws
-      $ source devel/setup.bash
-      $ roscore
+      cd ~/catkin_ws
+      source devel/setup.bash
+      roscore
       ```
 
 2. **Start camera node** (or start your own camera node)
       ```
-      $ rosrun dope camera.py  # Publishes RGB images to `/dope/webcam_rgb_raw`
+      rosrun dope camera.py  # Publishes RGB images to `/dope/webcam_rgb_raw`
       ```
   
 
@@ -75,7 +75,7 @@ This is the official DOPE ROS package for detection and 6-DoF pose estimation of
     
 4. **Start DOPE node**
     ```
-    $ rosrun dope dope.py [my_config.yaml]  # Config file is optional; default is `config_pose.yaml`
+    rosrun dope dope.py [my_config.yaml]  # Config file is optional; default is `config_pose.yaml`
     ```
 
     *Note:*  Config files must be located in the `~/catkin_ws/src/dope/config/` folder.

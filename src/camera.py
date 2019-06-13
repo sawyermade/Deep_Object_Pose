@@ -41,8 +41,8 @@ def start_realsense():
     # Returns pipeline and profile
     return [pipeline, profile]
     
-def publish_images(freq=5):
-    rospy.init_node('dope_webcam_rgb_raw', anonymous=True)
+def publish_images(freq=30):
+    rospy.init_node(cam_name, anonymous=True)
     images_out = rospy.Publisher(topic, Image_msg, queue_size=10)
     rate = rospy.Rate(freq)
 

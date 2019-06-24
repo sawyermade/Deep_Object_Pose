@@ -15,45 +15,45 @@ This is the official DOPE ROS package for detection and 6-DoF pose estimation of
    We have tested on Ubuntu 16.04 with ROS Kinetic with an NVIDIA Titan X with python 2.7.  The code may work on other systems.
    If you do not have the full ROS install, you may need to install some packages, *e.g.*,
    ```
-   apt-get install ros-kinetic-tf2
-   apt-get install ros-kinetic-cv-bridge
+   apt-get install ros-melodic-tf2
+   apt-get install ros-melodic-cv-bridge
    ```
    
    Alternatively, use the provided [Docker image](docker/readme.md) and skip to Step #5.
    
 2. **Create a catkin workspace** (if you do not already have one). To create a catkin workspace, follow these [instructions](http://wiki.ros.org/catkin/Tutorials/create_a_workspace):
      ```
-     mkdir -p ~/catkin_ws/src   # Replace `catkin_ws` with the name of your workspace
-     cd ~/catkin_ws/
+     mkdir -p ~/ROS/dope/src   # Replace `~/ROS/dope` with the name of your workspace
+     cd ~/ROS/dope/
      catkin_make
      ```
 
 3. **Download the DOPE code**
      ```
-     cd ~/catkin_ws/src
+     cd ~/ROS/dope/src
      git clone https://github.com/sawyermade/Deep_Object_Pose.git dope
      ```
 
 4. **Install dependencies**
      ```
-     cd ~/catkin_ws/src/dope
+     cd ~/ROS/dope/src/dope
      pip install -r requirements.txt
      ```
 
 5. **Build**
      ```
-     cd ~/catkin_ws
+     cd ~/ROS/dope
      catkin_make
      ``` 
 
-6. **Download [the weights](https://drive.google.com/open?id=1DfoA3m_Bm0fW8tOWXGVxi4ETlLEAgmcg)** and save them to the `weights` folder, *i.e.*, `~/catkin_ws/src/dope/weights/`.
+6. **Download [the weights](https://drive.google.com/open?id=1DfoA3m_Bm0fW8tOWXGVxi4ETlLEAgmcg)** and save them to the `weights` folder, *i.e.*, `~/ROS/dope/src/dope/weights/`.
 
 
 ## Running
 
 1. **Start ROS master**
       ```
-      cd ~/catkin_ws
+      cd ~/ROS/dope
       source devel/setup.bash
       roscore
       ```
@@ -64,7 +64,7 @@ This is the official DOPE ROS package for detection and 6-DoF pose estimation of
       ```
   
 
-3. **Edit config info** (if desired) in `~/catkin_ws/src/dope/config/config_pose.yaml`
+3. **Edit config info** (if desired) in `~/ROS/dope/src/dope/config/config_pose.yaml`
     * `topic_camera`: RGB topic to listen to
     * `topic_publishing`: topic name for publishing
     * `weights`: dictionary of object names and there weights path name, **comment out any line to disable detection/estimation of that object**
@@ -78,7 +78,7 @@ This is the official DOPE ROS package for detection and 6-DoF pose estimation of
     rosrun dope dope.py [my_config.yaml]  # Config file is optional; default is `config_pose.yaml`
     ```
 
-    *Note:*  Config files must be located in the `~/catkin_ws/src/dope/config/` folder.
+    *Note:*  Config files must be located in the `~/ROS/dope/src/dope/config/` folder.
 
 
 ## Debugging

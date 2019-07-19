@@ -31,6 +31,7 @@ def start_realsense():
     global pipeline, profile
     # Sets capture parameters
     width, height, fps = 640, 480, 30
+    # width, height, fps = 320, 240, 30
 
     # Sets up realsense pipeline and config
     pipeline = rs.pipeline()

@@ -1,10 +1,8 @@
+.git
 /weights
 *.pyc
 *._
 *.png
 __pycache__
-weights/*.pth
-weights/*.zip
-
 venv
 .idea

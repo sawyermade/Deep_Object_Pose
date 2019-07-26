@@ -313,9 +313,9 @@ def loadjson(path, objectsofinterest, img):
         # Get the centroids
         pcenter = info['projected_cuboid_centroid']
 
-        points3d.append ((pcenter[0],pcenter[1]))
+        points3d.append((pcenter[0],pcenter[1]))
         pointsBelief.append(points3d)
-        points.append (points3d + [(pcenter[0],pcenter[1])])
+        points.append(points3d + [(pcenter[0],pcenter[1])])
         centroids.append((pcenter[0],pcenter[1]))
 
         # load translations
@@ -1071,7 +1071,7 @@ def DrawCube(points, which_color = 0, color = None, draw = None):
 # TRAINING CODE MAIN STARTING HERE
 ##################################################
 
-print ("start:" , datetime.datetime.now().time())
+print("start:" , datetime.datetime.now().time())
 
 conf_parser = argparse.ArgumentParser(
     description=__doc__, # printed with -h/--help

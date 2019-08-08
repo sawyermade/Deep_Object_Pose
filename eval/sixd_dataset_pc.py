@@ -1,4 +1,4 @@
-import os, sys, yaml, cv2, numpy as np
+import os, sys, yaml, cv2, numpy as np, pickle
 
 # Finds dirs, gt, and info files
 def find_dirs(train_dir):
@@ -70,16 +70,55 @@ def find_depth_imgs(depth_dir_list, ext='png'):
 
 	return depth_img_list
 
+# Writes ply file
+def write_ply(vertex_list, img_path):
+	# Creates PLY path
+	img_dir, img_fname = os.path.split(img_path)
+	img_number, img_ext = img_fname.rsplit('.', 1)
+	ply_dir = os.path.join(os.path.split(img_dir)[0], 'ply')
+	ply_path = os.path.join(ply_dir, f'{img_number}.ply')
+
+	# Creates ply dir if !exist
+	if not os.path.exists(ply_dir):
+		os.makedirs(ply_dir)
+
+	# Writes ply
+	with open(ply_path, 'w') as pf:
+		# Writes header
+		pf.write(
+			'ply\n' +
+			'format ascii 1.0\n' +
+			f'element vertex {len(vertex_list)}\n' +
+			'property float x\n' +
+			'property float y\n' +
+			'property float z\n' +
+			'property uchar blue\n' +
+			'property uchar green\n' +
+			'property uchar red\n' + 
+			'property uchar alpha\n' +
+			'end_header\n'
+		)
+
+		# Writes vertices
+		for vertex in vertex_list:
+			v = [str(v) for v in vertex]
+			line = ' '.join(v) + '\n'
+			pf.write(line)
+
+	# Return ply path
+	return ply_path
+
 # Makes point clouds
 def make_clouds(depth_img_list, info_dict_list):
+	
 	# Goes through each object
-	obj_cloud_list = []
+	obj_number = 1
 	for obj_img_list, info_dict in zip(depth_img_list, info_dict_list):
-		
-		# Goes through images
-		img_cloud_list = []
-		for img_path in obj_img_list:
+		# DEBUG
+		print(f'Object #{obj_number} Started...')
 
+		# Goes through images
+		for img_path in obj_img_list:
 			# Gets img filename and number
 			img_filename = img_path.split(os.sep)[-1]
 			img_num = int(img_filename.split('.')[0])
@@ -94,42 +133,43 @@ def make_clouds(depth_img_list, info_dict_list):
 			fx, _, cx, _, fy, cy, _, _, _ = cam_K
 
 			# Opens image as is
-			img = cv2.imread(img_path, -1)
+			img_dir, img_fname = os.path.split(img_path)
+			img_rgb_path = os.path.join(os.path.split(img_dir)[0], 'rgb', img_fname)
+			img_bgr = cv2.imread(img_rgb_path, -1)
+			img_depth = cv2.imread(img_path, -1)
 
 			# Gets width and height
-			height, width = img.shape[:2]
+			height, width = img_depth.shape[:2]
 
 			# Goes through all the pixels
-			vector_list = []
+			vertex_list = []
 			for y in range(height):
 				for x in range(width):
-					d = img[y, x]
-					Z = d * depth_scale
+					B, G, R = img_bgr[y, x]
+					Z = img_depth[y, x] * depth_scale
+					if Z == 0: continue
 					X = (x - cx) * Z / fx
 					Y = (y - cy) * Z / fy
-					vector_list.append((X, Y, Z))
+					vertex_list.append((X, Y, Z, B, G, R, 0))
 
-			# Adds to image cloud list
-			img_cloud_list.append(vector_list)
+			# Writes ply file
+			ply_path = write_ply(vertex_list, img_path)
 
-		# Adss to object cloud list
-		obj_cloud_list.append(img_cloud_list)
+			# DEBUG
+			print(f'{img_path}:={ply_path}; Complete.')
+			sys.exit(0)
 
-	return obj_cloud_list
+		# # DEBUG
+		print(f'Object #{obj_number} Complete\n')
+		obj_number += 1
 
-if __name__ == '__main__':
+	# DEBUG
+	print('Depth Map to Point Cloud Complete.\n')
+
+def main():
 	# Args
 	data_dir = sys.argv[1]
 	train_dir = os.path.join(data_dir, 'train')
-	out_dir = os.path.join(data_dir, 'pc_train')
-	cam_path = os.path.join(data_dir, 'camera.yml')
-
-	# Creates out_dir
-	if not os.path.exists(out_dir):
-		os.makedirs(out_dir)
-
-	# # Gets camera intrinsics
-	# cam_intrinisics = yaml.load(open(cam_path))
 
 	# Gets depth dirs in train folder
 	depth_dir_list, rgb_dir_list, gt_list, info_list = find_dirs(train_dir)
@@ -142,3 +182,6 @@ if __name__ == '__main__':
 
 	# Creates point cloud from depth images
 	obj_cloud_list = make_clouds(depth_img_list, info_dict_list)
+
+if __name__ == '__main__':
+	main()

@@ -4,8 +4,21 @@ import os, sys, yaml, cv2, numpy as np
 DEBUG = False
 DEBUG_ONE = False
 
+# Gets all train directories
+def find_train_dirs(data_dir):
+	# Creates a list of paths to all train directories
+	train_dir_list = []
+	for root, dirs, files in os.walk(data_dir):
+		if dirs:
+			for d in dirs:
+				if d == 'train':
+					train_dir_list.append(os.path.join(root, d))
+
+	# Returns list of all train dir paths
+	return train_dir_list
+
 # Finds dirs, gt, and info files
-def find_dirs(train_dir):
+def find_depth_dirs(train_dir):
 	# Lists for depth, rgb, gt.yml, and info.yml paths
 	depth_dir_list = []
 	rgb_dir_list = []
@@ -119,8 +132,10 @@ def write_ply(vertex_list, img_path):
 
 # Makes point clouds
 def make_plys(depth_img_list, info_dict_list, verbose=False):
-	# VERBOSE
+	# Dataset subset name
 	dataset_name = depth_img_list[0][0].split(os.sep)[-5]
+
+	# VERBOSE
 	if verbose:
 		print(f'Dataset:{dataset_name} Start')
 
@@ -135,7 +150,7 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 		for img_path in obj_img_list:
 			# Gets img filename and number
 			img_fname = img_path.split(os.sep)[-1]
-			img_num = int(img_fname.split('.')[0])
+			img_num = int(img_fname.rsplit('.', 1)[0])
 
 			# Gets intrinsic for img
 			frame_dict = info_dict[img_num]
@@ -209,13 +224,7 @@ def main():
 		sys.exit(1)
 
 	# Gets all train directories
-	data_dir = sys.argv[1] # This is the eith main dataset path ex:/pathTo/sixdds/ with all dataset subsets or path to train dir of single dataset subset ex:/pathTo/sixdds/doumanoglou/train
-	train_dir_list = []
-	for root, dirs, files in os.walk(data_dir):
-		if dirs:
-			for d in dirs:
-				if d == 'train':
-					train_dir_list.append(os.path.join(root, d))
+	train_dir_list = find_train_dirs(sys.argv[1]) # This is the eith main dataset path ex:/pathTo/sixdds/ with all dataset subsets or path to train dir of single dataset subset ex:/pathTo/sixdds/doumanoglou/train
 
 	# Checks if its one dataset subset or not (sys.argv[1] == single train dir)
 	if not train_dir_list:
@@ -224,7 +233,7 @@ def main():
 	# Goes through all training directories
 	for train_dir in train_dir_list:
 		# Gets depth dirs in train folder
-		depth_dir_list, rgb_dir_list, gt_list, info_list = find_dirs(train_dir)
+		depth_dir_list, rgb_dir_list, gt_list, info_list = find_depth_dirs(train_dir)
 		# VERBOSE
 		if verbose: print('Found directories')
 

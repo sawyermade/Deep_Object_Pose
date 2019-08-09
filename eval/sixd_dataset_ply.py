@@ -104,6 +104,10 @@ def write_ply(vertex_list, img_path):
 	if not os.path.exists(ply_dir):
 		os.makedirs(ply_dir)
 
+	# Checks if ply file exists
+	# if os.path.exists(ply_path):
+	# 	return ply_path
+
 	# Writes ply
 	with open(ply_path, 'w') as pf:
 		# Writes header
@@ -149,14 +153,21 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 		# Goes through images
 		for img_path in obj_img_list:
 			# Gets img filename and number
-			img_fname = img_path.split(os.sep)[-1]
-			img_num = int(img_fname.rsplit('.', 1)[0])
+			img_dir, img_fname = os.path.split(img_path)
+			img_number, img_ext = img_fname.rsplit('.', 1)
+
+			# Checks if ply already exists
+			ply_dir = os.path.join(os.path.split(img_dir)[0], 'ply')
+			ply_path = os.path.join(ply_dir, f'{img_number}.ply')
+			if os.path.exists(ply_path):
+				print(f'Already Exists, Skipping... {ply_path}')
+				continue
 
 			# Gets intrinsic for img
-			frame_dict = info_dict[img_num]
+			frame_dict = info_dict[int(img_number)]
 			cam_K = frame_dict['cam_K']
 			depth_scale = frame_dict['depth_scale']
-			view_level = frame_dict['view_level']
+			# view_level = frame_dict['view_level']
 
 			# Sets intrinsics
 			fx, _, cx, _, fy, cy, _, _, _ = cam_K

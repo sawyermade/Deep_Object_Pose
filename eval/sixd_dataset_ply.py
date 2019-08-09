@@ -146,7 +146,7 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 			# Sets intrinsics
 			fx, _, cx, _, fy, cy, _, _, _ = cam_K
 
-			# Opens image as is
+			# Opens images as is
 			img_dir, img_fname = os.path.split(img_path)
 			img_rgb_path = os.path.join(os.path.split(img_dir)[0], 'rgb', img_fname)
 			img_bgr = cv2.imread(img_rgb_path, -1)

@@ -1,4 +1,4 @@
-import os, sys, yaml, cv2, numpy as np, pickle
+import os, sys, yaml, cv2, numpy as np
 
 DEBUG = False
 DEBUG_ONE = False

@@ -43,7 +43,7 @@ def find_dirs(train_dir):
 	info_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 
 	# Returns lists of directories
-	return [depth_dir_list, rgb_dir_list, gt_list, info_list]
+	return (depth_dir_list, rgb_dir_list, gt_list, info_list)
 
 # Loads info ymls
 def load_info_ymls(info_list):

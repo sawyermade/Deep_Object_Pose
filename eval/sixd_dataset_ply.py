@@ -167,7 +167,7 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 			img_bgr = cv2.imread(img_rgb_path, -1)
 			img_depth = cv2.imread(img_path, -1)
 
-			# Gets width and height
+			# Gets width and height of depth img
 			height, width = img_depth.shape[:2]
 
 			# Goes through all the pixels and adds all !0 vectors

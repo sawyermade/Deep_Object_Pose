@@ -1,5 +1,6 @@
 import os, sys, yaml, cv2, numpy as np
 
+# DEBUG
 DEBUG = False
 DEBUG_ONE = False
 

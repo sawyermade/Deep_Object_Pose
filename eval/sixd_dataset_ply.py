@@ -244,6 +244,8 @@ def main():
 	# Checks if its one dataset subset or not (sys.argv[1] == single train dir)
 	if not train_dir_list:
 		train_dir_list.append(data_dir)
+	else:
+		train_dir_list.sort(key=lambda x: x.split(os.sep)[-2])
 
 	# Goes through all training directories
 	for train_dir in train_dir_list:

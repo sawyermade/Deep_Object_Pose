@@ -164,10 +164,14 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 				continue
 
 			# Gets intrinsic for img
-			frame_dict = info_dict[int(img_number)]
-			cam_K = frame_dict['cam_K']
-			depth_scale = frame_dict['depth_scale']
-			# view_level = frame_dict['view_level']
+			try:
+				frame_dict = info_dict[int(img_number)]
+				cam_K = frame_dict['cam_K']
+				depth_scale = frame_dict['depth_scale']
+				# view_level = frame_dict['view_level']
+			except Exception as e:
+				print(f'Exception: {e}, Skipping {img_path}')
+				continue
 
 			# Sets intrinsics
 			fx, _, cx, _, fy, cy, _, _, _ = cam_K

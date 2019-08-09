@@ -167,7 +167,8 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 					if Z != 0:
 						X = (x - cx) * Z / fx
 						Y = (y - cy) * Z / fy
-						vertex_list.append((X, Y, Z, B, G, R, 0))
+						alpha = 0
+						vertex_list.append((X, Y, Z, B, G, R, alpha))
 
 			# Writes ply file
 			ply_path = write_ply(vertex_list, img_path)

@@ -155,16 +155,19 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 			# Gets width and height
 			height, width = img_depth.shape[:2]
 
-			# Goes through all the pixels
+			# Goes through all the pixels and adds all !0
 			vertex_list = []
 			for y in range(height):
 				for x in range(width):
+					# Gets RGB as opencv BGR and depth in millimeters
 					B, G, R = img_bgr[y, x]
 					Z = img_depth[y, x] * depth_scale
-					if Z == 0: continue
-					X = (x - cx) * Z / fx
-					Y = (y - cy) * Z / fy
-					vertex_list.append((X, Y, Z, B, G, R, 0))
+
+					# If Z == 0, fuck it
+					if Z != 0:
+						X = (x - cx) * Z / fx
+						Y = (y - cy) * Z / fy
+						vertex_list.append((X, Y, Z, B, G, R, 0))
 
 			# Writes ply file
 			ply_path = write_ply(vertex_list, img_path)

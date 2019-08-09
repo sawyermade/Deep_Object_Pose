@@ -155,7 +155,7 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 			# Gets width and height
 			height, width = img_depth.shape[:2]
 
-			# Goes through all the pixels and adds all !0
+			# Goes through all the pixels and adds all !0 vectors
 			vertex_list = []
 			for y in range(height):
 				for x in range(width):

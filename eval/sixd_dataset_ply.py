@@ -37,7 +37,7 @@ def find_dirs(train_dir):
 					# Break
 					break
 	
-	# Sorts  stable by object number/id
+	# Sorts stable by object number/id
 	depth_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 	rgb_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 	gt_list.sort(key=lambda x: int(x.split(os.sep)[-2]))

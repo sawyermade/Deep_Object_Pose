@@ -134,8 +134,8 @@ def make_plys(depth_img_list, info_dict_list, verbose=False):
 		# Goes through images
 		for img_path in obj_img_list:
 			# Gets img filename and number
-			img_filename = img_path.split(os.sep)[-1]
-			img_num = int(img_filename.split('.')[0])
+			img_fname = img_path.split(os.sep)[-1]
+			img_num = int(img_fname.split('.')[0])
 
 			# Gets intrinsic for img
 			frame_dict = info_dict[img_num]

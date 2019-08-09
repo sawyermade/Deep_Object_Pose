@@ -58,7 +58,7 @@ def load_info_ymls(info_list):
 	# Returns list to all info.yml for dataset subset
 	return info_dict_list
 
-# Finds all depth images
+# Finds all depth images for dataset subset
 def find_depth_imgs(depth_dir_list, ext='png'):
 	# Goes through depth dirs/objects
 	depth_img_list = []

@@ -71,7 +71,7 @@ def find_depth_imgs(depth_dir_list, ext='png'):
 
 				# If there are any .ext files
 				if files:
-					# Sorts by integer filename, gets full path to files, and adds to list
+					# Sorts by integer filename, gets full paths to files, and adds to list
 					files.sort(key=lambda x: int(x.rsplit('.', 1)[0]))
 					img_paths = [os.path.join(root, f) for f in files]
 					depth_img_list.append(img_paths)

@@ -1,4 +1,4 @@
-import os, sys, yaml, cv2, numpy as np
+import os, sys, yaml, numpy as np
 
 # DEBUG
 DEBUG = False
@@ -90,6 +90,36 @@ def find_files(train_dir_list):
 	# Returns lists of directories
 	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all)
 
+# Makes a dictionary with all models ply paths
+def make_models_dict(models_dir_list):
+	models_dict = {}
+	for model_dir in models_dir_list:
+		# Gets dataset name and adds to dict
+		dataset_name = model_dir.split(os.sep)[-2]
+		if dataset_name not in models_dict.keys():
+			models_dict.update({dataset_name : {}})
+
+		# Gets model ply and sorts by object number
+		for file in os.listdir(model_dir):
+			# Creates path to file
+			path = os.path.join(model_dir, file)
+
+			# If object ply file
+			if file.startswith('obj') and file.endswith('.ply'):
+				# Gets object number
+				name, ext = file.rsplit('.', 1)
+				obj_number = int(name.split('_')[-1])
+
+				# Adds path to dict
+				models_dict[dataset_name].update({obj_number : path})
+
+			# If model info file
+			if file.startswith('models_info'):
+				models_dict[dataset_name].update({'models_info' : path})
+
+	return models_dict
+
+# Reads model plys 
 def read_ply_model(ply_path):
 	# Opens model ply
 	vertex_list = []
@@ -127,15 +157,7 @@ def read_ply_model(ply_path):
 			if DEBUG and count % 1000 == 0: print(f'{count}: {l}')
 
 			# Copies vertices to list
-			# try:
 			line_list = [float(v) for v in l.split(' ')]
-			# except Exception as e:
-			# 	print(f'Exception: {e}')
-			# 	print(f'ply_path = {ply_path}')
-			# 	print(f"l = {l}")
-			# 	print(f"l.split = {l.split(' ')}")
-			# 	sys.exit(1)
-
 			if DEBUG and count % 1000 == 0: print(f'{count}: {line_list}')
 
 			# Adds to vertex_list
@@ -148,6 +170,7 @@ def read_ply_model(ply_path):
 		# Returns numpy array
 		return header_list, vertex_array
 
+# Does roation and translation on object model ply
 def rt_model(vertex_array, R, T):
 	# Goes through all points
 	vector_list = []
@@ -158,12 +181,11 @@ def rt_model(vertex_array, R, T):
 		vector_list.append(xyz + rgb)
 	return np.asarray(vector_list)
 
-def write_ply_model(vertex_array, ply_path, header_list):
+# Writes new ply model after R & T
+def write_ply_model(vertex_array, ply_path):
 	# Writes ply
 	with open(ply_path, 'w') as pf:
 		# Writes header
-		# for header in header_list:
-		# 	pf.write(header + '\n')
 		pf.write(
 			'ply\n' +
 			'format ascii 1.0\n' +
@@ -181,37 +203,11 @@ def write_ply_model(vertex_array, ply_path, header_list):
 		# Writes vertices
 		for vertex in vertex_array:
 			v = [str(v) for v in vertex[:3]] + [str(int(v)) for v in vertex[-3:]] + [str(0)]
-			# v = [str(v) for v in vertex]
 			line = ' '.join(v) + '\n'
 			pf.write(line)
 
-def make_models_dict(models_dir_list):
-	models_dict = {}
-	for model_dir in models_dir_list:
-		# Gets dataset name and adds to dict
-		dataset_name = model_dir.split(os.sep)[-2]
-		if dataset_name not in models_dict.keys():
-			models_dict.update({dataset_name : {}})
-
-		# Gets model ply and sorts by object number
-		for file in os.listdir(model_dir):
-			# Creates path to file
-			path = os.path.join(model_dir, file)
-
-			# If object ply file
-			if file.startswith('obj') and file.endswith('.ply'):
-				# Gets object number
-				name, ext = file.rsplit('.', 1)
-				obj_number = int(name.split('_')[-1])
-
-				# Adds path to dict
-				models_dict[dataset_name].update({obj_number : path})
-
-			# If model info file
-			if file.startswith('models_info'):
-				models_dict[dataset_name].update({'models_info' : path})
-
-	return models_dict
+	# Returns true if complete
+	return True
 
 # Main
 def main():
@@ -243,6 +239,7 @@ def main():
 
 		# Opens ground truth
 		with open(gt_path) as gtf:
+			# Loads gt
 			gt_dict = yaml.load(gtf)
 
 			# Goes through gt dict
@@ -270,7 +267,7 @@ def main():
 					continue
 				else:
 					rt_to_save = rt_model(vertex_array, R, T)
-					write_ply_model(rt_to_save, rt_path, header_list)
+					write_ply_model(rt_to_save, rt_path)
 
 				# Displays status
 				print(f'{rt_path}: Complete')

@@ -118,7 +118,7 @@ def read_ply_model(ply_path):
 			# Checks if less than num vertices
 			if not count < vertex_count:
 				if DEBUG: print(f'{count}: {l}')
-				if l: line_list = [float(v) for v in l.split(' ')[:-3]] + [int(v) for v in l.split(' ')[-3:]]
+				if l: line_list = [float(v) for v in l.split(' ')[:3]] + [int(v) for v in l.split(' ')[6:9]]
 				if DEBUG: print(f'{count}: {line_list}')
 				break
 
@@ -158,10 +158,12 @@ def rt_model(vertex_array, R, T):
 		vector_list.append(xyz + rgb)
 	return np.asarray(vector_list)
 
-def write_ply_model(vertex_array, ply_path):
+def write_ply_model(vertex_array, ply_path, header_list):
 	# Writes ply
 	with open(ply_path, 'w') as pf:
 		# Writes header
+		# for header in header_list:
+		# 	pf.write(header + '\n')
 		pf.write(
 			'ply\n' +
 			'format ascii 1.0\n' +
@@ -179,6 +181,7 @@ def write_ply_model(vertex_array, ply_path):
 		# Writes vertices
 		for vertex in vertex_array:
 			v = [str(v) for v in vertex[:3]] + [str(int(v)) for v in vertex[-3:]] + [str(0)]
+			# v = [str(v) for v in vertex]
 			line = ' '.join(v) + '\n'
 			pf.write(line)
 
@@ -267,7 +270,7 @@ def main():
 					continue
 				else:
 					rt_to_save = rt_model(vertex_array, R, T)
-					write_ply_model(rt_to_save, rt_path)
+					write_ply_model(rt_to_save, rt_path, header_list)
 
 				# Displays status
 				print(f'{rt_path}: Complete')

@@ -122,12 +122,20 @@ def read_ply_model(ply_path):
 				if DEBUG: print(f'{count}: {line_list}')
 				break
 
-			# Strips line sep
-			l = line.strip(os.linesep)
+			# Strips line sep and any whitespace
+			l = line.strip(os.linesep).strip(' ')
 			if DEBUG and count % 1000 == 0: print(f'{count}: {l}')
 
 			# Copies vertices to list
+			# try:
 			line_list = [float(v) for v in l.split(' ')]
+			# except Exception as e:
+			# 	print(f'Exception: {e}')
+			# 	print(f'ply_path = {ply_path}')
+			# 	print(f"l = {l}")
+			# 	print(f"l.split = {l.split(' ')}")
+			# 	sys.exit(1)
+
 			if DEBUG and count % 1000 == 0: print(f'{count}: {line_list}')
 
 			# Adds to vertex_list

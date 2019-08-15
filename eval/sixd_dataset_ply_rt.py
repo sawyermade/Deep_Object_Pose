@@ -199,7 +199,7 @@ def make_models_dict(models_dir_list):
 			path = os.path.join(model_dir, file)
 
 			# If object ply file
-			if file.startswith('obj'):
+			if file.startswith('obj') and file.endswith('.ply'):
 				# Gets object number
 				name, ext = file.rsplit('.', 1)
 				obj_number = int(name.split('_')[-1])

@@ -63,7 +63,7 @@ def find_files(train_dir_list):
 						p = os.path.join(root, 'info.yml')
 						info_list.append(p)
 
-						# Adds rt path
+						# Adds rt path and creates rt dir if it doesnt exist
 						p = os.path.join(root, 'rt')
 						if not os.path.exists(p):
 							os.makedirs(p)

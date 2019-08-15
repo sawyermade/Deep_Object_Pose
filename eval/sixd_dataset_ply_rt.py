@@ -171,9 +171,9 @@ def write_ply_model(vertex_array, ply_path, header_list):
 			'property float x\n' +
 			'property float y\n' +
 			'property float z\n' +
-			'property uchar blue\n' +
-			'property uchar green\n' +
 			'property uchar red\n' + 
+			'property uchar green\n' +
+			'property uchar blue\n' +
 			'property uchar alpha\n' +
 			'end_header\n'
 		)

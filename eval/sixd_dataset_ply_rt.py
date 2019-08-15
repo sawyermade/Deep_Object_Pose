@@ -212,7 +212,7 @@ def write_ply_model(vertex_array, ply_path):
 # Main
 def main():
 	# Args
-	if sys.argc < 2:
+	if len(sys.argv) < 2:
 		print('Must include path to dataset dir as only argument')
 		sys.exit(1)
 	data_dir = sys.argv[1]

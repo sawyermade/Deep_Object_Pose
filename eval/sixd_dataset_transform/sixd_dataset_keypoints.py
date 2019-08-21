@@ -347,7 +347,7 @@ def main():
 
 	# Completed
 	time_stop = time.time()
-	time_total = time_start - time_stop
+	time_total = time_stop - time_start
 	time_minutes = time_total // 60
 	time_hours = time_total // 60**2
 	time_seconds = time_total % 60

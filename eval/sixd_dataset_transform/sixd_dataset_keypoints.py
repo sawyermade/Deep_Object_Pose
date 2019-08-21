@@ -10,13 +10,21 @@ def find_dirs(data_dir):
 	models_dir_list = []
 	for root, dirs, files in os.walk(data_dir):
 		if dirs:
+			flag1, flag2 = False, False
 			for d in dirs:
+				# If already found train and models directories
+				if flag1 and flag2:
+					break
+					
+				# If train directory
 				if d == 'train':
 					train_dir_list.append(os.path.join(root, d))
+					flag1 = True
 
+				# If models directory
 				if d == 'models':
 					models_dir_list.append(os.path.join(root, d))
-
+					flag2 = True
 
 	# Sorts by dataset name
 	train_dir_list.sort(key=lambda x: x.split(os.sep)[-2])

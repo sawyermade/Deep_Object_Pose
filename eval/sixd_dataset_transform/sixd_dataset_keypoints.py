@@ -1,4 +1,4 @@
-import os, sys, yaml, numpy as np
+import os, sys, yaml, numpy as np, time
 
 # DEBUG
 DEBUG = False
@@ -275,6 +275,7 @@ def main():
 	print('Created models dictionary')
 	
 	# Converts all in gt
+	time_start = time.time()
 	print('\nStarting conversions...\n')
 	for gt_path, kp_dir in zip(gt_list, kp_dir_list):
 		# Display
@@ -334,6 +335,14 @@ def main():
 
 		# Display
 		print(f'Completed: {gt_path}\n')
+
+	# Completed
+	time_stop = time.time()
+	time_total = time_start - time_stop
+	time_minutes = time_total // 60
+	time_hours = time_total // 60**2
+	time_seconds = time_total % 60
+	print(f'Conversions Completed: {str(time_hours).zfill(2)}:{str(time_minutes).zfill(2)}:{str(time_seconds).zfill(2)}')
 
 if __name__ == '__main__':
 	main()

@@ -166,7 +166,7 @@ def read_ply_model(ply_path):
 			# Checks if less than num vertices
 			if not count < vertex_count:
 				if DEBUG: print(f'{count}: {l}')
-				if l: line_list = [float(v) for v in l.split(' ')[:3]] + [int(v) for v in l.split(' ')[-3:]]
+				if l: line_list = [float(v) for v in l.split(' ')[:3]] + [int(v) for v in l.split(' ')[6:9]]
 				if DEBUG: print(f'{count}: {line_list}')
 				break
 
@@ -193,7 +193,6 @@ def calc_cuboid(model_info):
 	# Gets model info contents
 	diameter, min_x, min_y, min_z, size_x, size_y, size_z = [model_info[k] for k in sorted(model_info.keys())]
 	max_x, max_y, max_z = min_x + size_x, min_y + size_y, min_z + size_z
-	# print(min_x, max_x, min_y, max_y, min_z, max_z)
 	
 	# Create keypoints np array
 	keypoint_array = np.zeros((8,3))
@@ -214,7 +213,6 @@ def calc_cuboid(model_info):
 	keypoint_array[3] = np.asarray([max_x, max_y, min_z])
 	keypoint_array[7] = np.asarray([max_x, max_y, max_z])
 
-	# print(keypoint_array)
 	return keypoint_array
 
 # Does roation and translation on cuboid keypoints
@@ -256,20 +254,6 @@ def write_ply_keypoints(keypoint_array, ply_path):
 	# Returns true if complete
 	return True
 
-def test():
-	# Paths
-	model_path = f'models/obj_{str(obj_number).zfill(2)}.ply'
-	model_info = yaml.load(open('models/models_info.yml'))[obj_number]
-
-	# Gets all vertices
-	headler_list, vertex_array = read_ply_model(model_path)
-
-	# Calculate cuboid keypoints
-	keypoint_array = calc_cuboid(model_info)
-
-	# Write new ply with keypoints
-	ret = write_ply_keypoints(vertex_array, keypoint_array, f'./kp_test_{str(obj_number).zfill(2)}.ply')
-
 # Main
 def main():
 	# Args
@@ -301,6 +285,8 @@ def main():
 
 		# Gets dataset name
 		dataset_name = gt_split[-4]
+		if dataset_name == 'train':
+			dataset_name = 'tudlight'
 
 		# Opens ground truth
 		header_list, vertex_array, model_info = [None] * 3
@@ -321,9 +307,11 @@ def main():
 
 				# Opens model unless already open
 				if not model_path == model_path_prev:
+					# Opens object model 
 					header_list, vertex_array = read_ply_model(model_path)
 					model_path_prev = model_path
 
+					# Opens model_info.yml and calcs keypoints
 					with open(model_info_path) as info:
 						model_info = yaml.load(info)[obj_number]
 						keypoint_array = calc_cuboid(model_info)
@@ -348,5 +336,4 @@ def main():
 		print(f'Completed: {gt_path}\n')
 
 if __name__ == '__main__':
-	# test()
 	main()

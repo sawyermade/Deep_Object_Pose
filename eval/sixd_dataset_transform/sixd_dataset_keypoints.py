@@ -294,8 +294,8 @@ def main():
 			dataset_name = 'tudlight'
 
 		# Opens ground truth
-		header_list, vertex_array, model_info = [None] * 3
-		model_path_prev, keypoint_array = [None] * 2
+		header_list, vertex_array, model_info = [None]*3
+		model_path_prev, keypoint_array = [None]*2
 		with open(gt_path) as gtf:
 			# Loads gt
 			gt_dict = yaml.load(gtf)

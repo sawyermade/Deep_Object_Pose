@@ -104,8 +104,7 @@ def find_files(train_dir_list):
 		info_list_all += info_list
 		rt_dir_list_all += rt_dir_list
 		kp_dir_list_all += kp_dir_list
-		ply_dir_list_all += ply_dir_lis
-t
+		ply_dir_list_all += ply_dir_list
 	# Returns lists of directories
 	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all, kp_dir_list_all, ply_dir_list_all)
 
@@ -190,7 +189,7 @@ def read_ply_model(ply_path):
 		return header_list, vertex_array
 
 # Calc cuboid keypoints
-def calc_cuboid(model_info, vertex_array):
+def calc_cuboid(model_info):
 	# Gets model info contents
 	diameter, min_x, min_y, min_z, size_x, size_y, size_z = [model_info[k] for k in sorted(model_info.keys())]
 	max_x, max_y, max_z = min_x + size_x, min_y + size_y, min_z + size_z
@@ -217,6 +216,17 @@ def calc_cuboid(model_info, vertex_array):
 
 	# print(keypoint_array)
 	return keypoint_array
+
+# Does roation and translation on cuboid keypoints
+def rt_kp(kp_array, R, T):
+	# Goes through all keypoints
+	kp_list = []
+	for kp in kp_array:
+		xyz = kp.reshape((3,1))
+		xyz = np.matmul(R, xyz) + T
+		xyz = xyz.flatten().tolist()
+		kp_list.append(xyz)
+	return np.asarray(kp_list)
 
 # Writes new keypoint model after R & T
 def write_ply_keypoints(keypoint_array, ply_path):
@@ -255,7 +265,7 @@ def test():
 	headler_list, vertex_array = read_ply_model(model_path)
 
 	# Calculate cuboid keypoints
-	keypoint_array = calc_cuboid(model_info, vertex_array)
+	keypoint_array = calc_cuboid(model_info)
 
 	# Write new ply with keypoints
 	ret = write_ply_keypoints(vertex_array, keypoint_array, f'./kp_test_{str(obj_number).zfill(2)}.ply')
@@ -282,7 +292,6 @@ def main():
 	
 	# Converts all in gt
 	print('\nStarting conversions...\n')
-	model_path_prev = None
 	for gt_path, kp_dir in zip(gt_list, kp_dir_list):
 		# Display
 		print(f'Starting: {gt_path}')
@@ -294,6 +303,8 @@ def main():
 		dataset_name = gt_split[-4]
 
 		# Opens ground truth
+		header_list, vertex_array, model_info = [None] * 3
+		model_path_prev, keypoint_array = [None] * 2
 		with open(gt_path) as gtf:
 			# Loads gt
 			gt_dict = yaml.load(gtf)
@@ -306,11 +317,16 @@ def main():
 				# Opens model ply if not open
 				obj_number = int(frame_dict['obj_id'])
 				model_path = models_dict[dataset_name][obj_number]
+				model_info_path = models_dict[dataset_name]['models_info']
 
 				# Opens model unless already open
 				if not model_path == model_path_prev:
 					header_list, vertex_array = read_ply_model(model_path)
 					model_path_prev = model_path
+
+					with open(model_info_path) as info:
+						model_info = yaml.load(info)[obj_number]
+						keypoint_array = calc_cuboid(model_info)
 
 				# Gets R & T
 				R = np.asarray(frame_dict['cam_R_m2c']).reshape((3,3))
@@ -322,7 +338,7 @@ def main():
 					print(f'Already Exists, Skipping... {kp_path}')
 					continue
 				else:
-					kp_to_save = kp_rt(vertex_array, R, T)
+					kp_to_save = rt_kp(keypoint_array, R, T)
 					write_ply_keypoints(kp_to_save, kp_path)
 
 				# Displays status
@@ -332,5 +348,5 @@ def main():
 		print(f'Completed: {gt_path}\n')
 
 if __name__ == '__main__':
-	test()
-	# main()
+	# test()
+	main()

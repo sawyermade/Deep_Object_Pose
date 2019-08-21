@@ -224,10 +224,15 @@ def rt_kp(kp_array, R, T):
 	# Goes through all keypoints
 	kp_list = []
 	for kp in kp_array:
+		# Reshapes xyz vector
 		xyz = kp.reshape((3,1))
+
+		# Rotates and translates xyz vector and flattens
 		xyz = np.matmul(R, xyz) + T
 		xyz = xyz.flatten().tolist()
 		kp_list.append(xyz)
+
+	# Returns keypoint list as np array
 	return np.asarray(kp_list)
 
 # Writes new keypoint model after R & T
@@ -293,7 +298,7 @@ def main():
 		if dataset_name == 'train':
 			dataset_name = 'tudlight'
 
-		# Opens ground truth
+		# Opens ground truth and goes through frames
 		header_list, vertex_array, model_info = [None]*3
 		model_path_prev, keypoint_array = [None]*2
 		with open(gt_path) as gtf:
@@ -302,7 +307,7 @@ def main():
 
 			# Goes through gt dict
 			for frame_num, frame_list in gt_dict.items():
-				# Gets dict
+				# Gets dict, only one element and always zero
 				frame_dict = frame_list[0]
 
 				# Gets opject/model info

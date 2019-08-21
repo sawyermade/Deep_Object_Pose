@@ -106,11 +106,13 @@ def find_files(train_dir_list):
 		rt_dir_list_all += rt_dir_list
 		kp_dir_list_all += kp_dir_list
 		ply_dir_list_all += ply_dir_list
+
 	# Returns lists of directories
 	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all, kp_dir_list_all, ply_dir_list_all)
 
 # Makes a dictionary with all models ply paths
 def make_models_dict(models_dir_list):
+	# Goes through all models directories
 	models_dict = {}
 	for model_dir in models_dir_list:
 		# Gets dataset name and adds to dict
@@ -136,6 +138,7 @@ def make_models_dict(models_dir_list):
 			if file.startswith('models_info'):
 				models_dict[dataset_name].update({'models_info' : path})
 
+	# Returns model dict of paths, dict[dataset_name][obj_number]
 	return models_dict
 
 # Reads model plys 

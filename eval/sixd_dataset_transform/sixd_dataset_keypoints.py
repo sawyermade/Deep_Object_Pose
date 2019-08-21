@@ -305,7 +305,7 @@ def main():
 				# Gets dict
 				frame_dict = frame_list[0]
 
-				# Opens model ply if not open
+				# Gets opject/model info
 				obj_number = int(frame_dict['obj_id'])
 				model_path = models_dict[dataset_name][obj_number]
 				model_info_path = models_dict[dataset_name]['models_info']

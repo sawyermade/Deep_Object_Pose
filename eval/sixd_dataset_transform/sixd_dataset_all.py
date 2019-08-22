@@ -36,6 +36,7 @@ def find_files(train_dir_list):
 	rt_dir_list_all = []
 	kp_dir_list_all = []
 	ply_dir_list_all = []
+	cuboid_dir_list_all = []
 	for train_dir in train_dir_list:
 		# Lists for depth, rgb, gt.yml, and info.yml paths
 		depth_dir_list = []
@@ -45,6 +46,7 @@ def find_files(train_dir_list):
 		rt_dir_list = []
 		kp_dir_list = []
 		ply_dir_list = []
+		cuboid_dir_list = []
 
 		# Walks train directory
 		for root, dirs, files in os.walk(train_dir):
@@ -86,6 +88,12 @@ def find_files(train_dir_list):
 							os.makedirs(p)
 						ply_dir_list.append(p)
 
+						# Adds ply path and creates rt dir if it doesnt exist
+						p = os.path.join(root, 'cuboid')
+						if not os.path.exists(p):
+							os.makedirs(p)
+						cuboid_dir_list.append(p)
+
 						# Break
 						break
 		
@@ -97,6 +105,7 @@ def find_files(train_dir_list):
 		rt_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 		kp_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 		ply_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
+		cuboid_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 
 		# Adds to all lists
 		depth_dir_list_all += depth_dir_list
@@ -106,9 +115,10 @@ def find_files(train_dir_list):
 		rt_dir_list_all += rt_dir_listfind_depth_imgs(depth_dir_list)
 		kp_dir_list_all += kp_dir_list
 		ply_dir_list_all += ply_dir_list
+		cuboid_dir_list_all += cuboid_dir_list
 
 	# Returns lists of directories
-	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all, kp_dir_list_all, ply_dir_list_all)
+	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all, kp_dir_list_all, ply_dir_list_all, cuboid_dir_list_all)
 
 # Makes a dictionary with all models ply paths
 def make_models_dict(models_dir_list):

@@ -335,7 +335,7 @@ def main():
 	# Converts all in gt
 	time_start = time.time()
 	print('\nStarting conversions...\n')
-	for gt_path, kp_dir, rt_dir, ply_dir, info_dir, cuboid_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list, cuboid_dir_list):
+	for gt_path, kp_dir, rt_dir, ply_dir, info_dir, cuboid_dir, depth_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list, cuboid_dir_list, depth_dir_list):
 		# Display
 		print(f'Starting: {gt_path}')
 
@@ -379,7 +379,7 @@ def main():
 				R = np.asarray(frame_dict['cam_R_m2c']).reshape((3,3))
 				T = np.asarray(frame_dict['cam_t_m2c']).reshape((3,1))
 
-				# Gets path, converts, and saves
+				# Gets path, converts, and saves keypoints rotated/translated
 				kp_path = os.path.join(kp_dir, str(frame_num).zfill(4) + '.ply')
 				if os.path.exists(kp_path):
 					print(f'Already Exists, Skipping... {kp_path}')
@@ -388,7 +388,7 @@ def main():
 					kp_to_save = rt_kp(keypoint_array, R, T)
 					write_ply_keypoints(kp_to_save, kp_path)
 
-				# Gets path, converts, and saves
+				# Gets path, converts, and saves rotated/translated model ply
 				rt_path = os.path.join(rt_dir, str(frame_num).zfill(4) + '.ply')
 				if os.path.exists(rt_path):
 					print(f'Already Exists, Skipping... {rt_path}')

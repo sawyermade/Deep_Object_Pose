@@ -325,7 +325,7 @@ def main():
 	print('Found directories.')
 
 	# Gets the rest of dirs and files we need from train dirs
-	depth_dir_list, rgb_dir_list, gt_list, info_list, rt_dir_list, kp_dir_list, ply_dir_list = find_files(train_dir_list)
+	depth_dir_list, rgb_dir_list, gt_list, info_list, rt_dir_list, kp_dir_list, ply_dir_list, cuboid_dir_list = find_files(train_dir_list)
 	print('Found files')
 
 	# Create object model ply dictionary
@@ -335,7 +335,7 @@ def main():
 	# Converts all in gt
 	time_start = time.time()
 	print('\nStarting conversions...\n')
-	for gt_path, kp_dir, rt_dir, ply_dir, info_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list):
+	for gt_path, kp_dir, rt_dir, ply_dir, info_dir, cuboid_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list, cuboid_dir_list):
 		# Display
 		print(f'Starting: {gt_path}')
 

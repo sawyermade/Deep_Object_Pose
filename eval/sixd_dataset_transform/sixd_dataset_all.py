@@ -1,4 +1,4 @@
-import os, sys, yaml, numpy as np, time
+import os, sys, yaml, numpy as np, time, cv2
 
 # DEBUG
 DEBUG = False

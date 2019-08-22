@@ -388,11 +388,20 @@ def depth_to_ply(depth_img_path, rgb_img_path, cam_K, depth_scale):
 
 # Main
 def main():
-	# Args
-	if len(sys.argv) < 2:
-		print('Must include path to dataset dir as only argument')
+	# Args, needs -d /path/to/dataset. the rest are optional, only makes kp.yml by default
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-d', '--directory', help='Path to dataset dir', type=str)
+	parser.add_argument('-p', '--ply', help='Depth image to ply point cloud?', default=False, action='store_true')
+	parser.add_argument('-r', '--rt', help='Rotate and translate ply object model?', default=False, action='store_true')
+	parser.add_argument('-k', '--kp', help='Create rotated and translated keypoint ply?', default=False, action='store_true')
+	args = parser.parse_args()
+
+	# Checks required args are there
+	if not args.directory:
+		parser.print_help()
 		sys.exit(1)
-	data_dir = sys.argv[1]
+	else:
+		data_dir = args.directory
 
 	# Gets train and models dirs
 	train_dir_list, models_dir_list = find_dirs(data_dir)
@@ -416,7 +425,7 @@ def main():
 		# Splits gt_file path
 		gt_split = gt_path.split(os.sep)
 
-		# Gets dataset name
+		# Gets dataset name, tudlight has refined directory this takes care of
 		dataset_name = gt_split[-4]
 		if dataset_name == 'train':
 			dataset_name = 'tudlight'
@@ -445,15 +454,16 @@ def main():
 				depth_scale = info_frame_dict['depth_scale']
 
 				# creates and saves ply from depth map/image
-				ply_path = os.path.join(ply_dir, str(frame_num).zfill(4) + '.ply')
-				if os.path.exists(ply_path):
-					print(f'Already Exists, Skipping... {ply_path}')
-				else:
-					depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(4) + '.png')
-					rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(4) + '.png')
-					ply_points = depth_to_ply(depth_img_path, rgb_img_path, cam_K.flatten(), depth_scale)
-					write_ply(ply_points, ply_path)
-					print(f'{ply_path}: Complete')
+				if args.ply:
+					ply_path = os.path.join(ply_dir, str(frame_num).zfill(4) + '.ply')
+					if os.path.exists(ply_path):
+						print(f'Already Exists, Skipping... {ply_path}')
+					else:
+						depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(4) + '.png')
+						rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(4) + '.png')
+						ply_points = depth_to_ply(depth_img_path, rgb_img_path, cam_K.flatten(), depth_scale)
+						write_ply(ply_points, ply_path)
+						print(f'{ply_path}: Complete')
 
 				# Gets opject/model info
 				obj_number = int(frame_dict['obj_id'])
@@ -476,22 +486,24 @@ def main():
 				T = np.asarray(frame_dict['cam_t_m2c']).reshape((3,1))
 
 				# Gets path, converts, and saves keypoints rotated/translated
-				kp_ply_path = os.path.join(kp_dir, str(frame_num).zfill(4) + '.ply')
 				kp_3d = rt_kp(keypoint_array, R, T)
-				if os.path.exists(kp_ply_path):
-					print(f'Already Exists, Skipping... {kp_ply_path}')
-				else:
-					write_ply_keypoints(kp_3d, kp_ply_path)
-					print(f'{kp_ply_path}: Complete')
+				if args.kp:
+					kp_ply_path = os.path.join(kp_dir, str(frame_num).zfill(4) + '.ply')
+					if os.path.exists(kp_ply_path):
+						print(f'Already Exists, Skipping... {kp_ply_path}')
+					else:
+						write_ply_keypoints(kp_3d, kp_ply_path)
+						print(f'{kp_ply_path}: Complete')
 
 				# Gets path, converts, and saves rotated/translated model ply
-				rt_path = os.path.join(rt_dir, str(frame_num).zfill(4) + '.ply')
-				if os.path.exists(rt_path):
-					print(f'Already Exists, Skipping... {rt_path}')
-				else:
-					rt_to_save = rt_model(vertex_array, R, T)
-					write_ply_model(rt_to_save, rt_path)
-					print(f'{rt_path}: Complete')
+				if args.rt:
+					rt_path = os.path.join(rt_dir, str(frame_num).zfill(4) + '.ply')
+					if os.path.exists(rt_path):
+						print(f'Already Exists, Skipping... {rt_path}')
+					else:
+						rt_to_save = rt_model(vertex_array, R, T)
+						write_ply_model(rt_to_save, rt_path)
+						print(f'{rt_path}: Complete')
 				
 				# Makes keypoint dict
 				kp_2d = keypoints_3D_to_2D(kp_3d, cam_K)
@@ -505,9 +517,10 @@ def main():
 			# Saves keypoint dict as yml
 			if os.path.exists(kp_yml_path):
 				print(f'Already Exists, Skipping... {kp_yml_path}')
-			with open(kp_yml_path, 'w') as kpf:
-				yaml.dump(kp_dict, kpf)
-				print(f'{kp_yml_path}: Complete')
+			else:
+				with open(kp_yml_path, 'w') as kpf:
+					yaml.dump(kp_dict, kpf)
+					print(f'{kp_yml_path}: Complete')
 
 		# Display
 		print(f'Completed: {gt_path}\n')

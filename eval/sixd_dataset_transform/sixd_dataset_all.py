@@ -110,7 +110,7 @@ def find_files(train_dir_list):
 		rgb_dir_list_all += rgb_dir_list
 		gt_list_all += gt_list
 		info_list_all += info_list
-		rt_dir_list_all += rt_dir_listfind_depth_imgs(depth_dir_list)
+		rt_dir_list_all += rt_dir_list
 		kp_dir_list_all += kp_dir_list
 		ply_dir_list_all += ply_dir_list
 		kp_list_all += kp_list
@@ -358,7 +358,7 @@ def keypoints_3D_to_2D(kp_list, cam_K):
 		kp_temp = (kp / kp[-1]).reshape((3,1))
 		kp_2d = np.matmul(cam_K, kp_temp)
 		x, y = kp_2d[0] * kp_2d[2], kp_2d[1] * kp_2d[2]
-		kp_2d_list.append([x,y])
+		kp_2d_list.append([int(x),int(y)])
 
 	return np.asarray(kp_2d_list)
 
@@ -505,7 +505,8 @@ def main():
 			# if os.path.exists(kp_yml_path):
 			# 	print(f'Already Exists, Skipping... {kp_yml_path}')
 			with open(kp_yml_path, 'w') as kpf:
-				yaml.dump(kp_dict, kpf, default_flow_style=True)
+				# yaml.dump(kp_dict, kpf, default_flow_style=True)
+				yaml.dump(kp_dict, kpf)
 				print(f'{kp_yml_path}: Complete')
 
 		# Display

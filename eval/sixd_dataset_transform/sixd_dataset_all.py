@@ -36,7 +36,7 @@ def find_files(train_dir_list):
 	rt_dir_list_all = []
 	kp_dir_list_all = []
 	ply_dir_list_all = []
-	cuboid_dir_list_all = []
+	kp_list_all = []
 	for train_dir in train_dir_list:
 		# Lists for depth, rgb, gt.yml, and info.yml paths
 		depth_dir_list = []
@@ -46,7 +46,7 @@ def find_files(train_dir_list):
 		rt_dir_list = []
 		kp_dir_list = []
 		ply_dir_list = []
-		cuboid_dir_list = []
+		kp_list = []
 
 		# Walks train directory
 		for root, dirs, files in os.walk(train_dir):
@@ -89,10 +89,8 @@ def find_files(train_dir_list):
 						ply_dir_list.append(p)
 
 						# Adds ply path and creates rt dir if it doesnt exist
-						p = os.path.join(root, 'cuboid')
-						if not os.path.exists(p):
-							os.makedirs(p)
-						cuboid_dir_list.append(p)
+						p = os.path.join(root, 'kp.yml')
+						kp_list.append(p)
 
 						# Break
 						break
@@ -105,7 +103,7 @@ def find_files(train_dir_list):
 		rt_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 		kp_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 		ply_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
-		cuboid_dir_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
+		kp_list.sort(key=lambda x: int(x.split(os.sep)[-2]))
 
 		# Adds to all lists
 		depth_dir_list_all += depth_dir_list
@@ -115,10 +113,10 @@ def find_files(train_dir_list):
 		rt_dir_list_all += rt_dir_listfind_depth_imgs(depth_dir_list)
 		kp_dir_list_all += kp_dir_list
 		ply_dir_list_all += ply_dir_list
-		cuboid_dir_list_all += cuboid_dir_list
+		kp_list_all += kp_list
 
 	# Returns lists of directories
-	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all, kp_dir_list_all, ply_dir_list_all, cuboid_dir_list_all)
+	return (depth_dir_list_all, rgb_dir_list_all, gt_list_all, info_list_all, rt_dir_list_all, kp_dir_list_all, ply_dir_list_all, kp_list_all)
 
 # Makes a dictionary with all models ply paths
 def make_models_dict(models_dir_list):
@@ -312,6 +310,81 @@ def write_ply_model(vertex_array, ply_path):
 	# Returns true if complete
 	return True
 
+# Writes ply file
+def write_ply(vertex_list, ply_path):
+	# Creates ply path
+	# img_dir, img_fname = os.path.split(img_path)
+	# img_number, img_ext = img_fname.rsplit('.', 1)
+	# ply_dir = os.path.join(os.path.split(img_dir)[0], 'ply')
+	# ply_path = os.path.join(ply_dir, f'{img_number}.ply')
+
+	# Creates ply dir if !exists
+	# if not os.path.exists(ply_dir):
+	# 	os.makedirs(ply_dir)
+
+	# Checks if ply file exists
+	# if os.path.exists(ply_path):
+	# 	return ply_path
+
+	# Writes ply
+	with open(ply_path, 'w') as pf:
+		# Writes header
+		pf.write(
+			'ply\n' +
+			'format ascii 1.0\n' +
+			f'element vertex {len(vertex_list)}\n' +
+			'property float x\n' +
+			'property float y\n' +
+			'property float z\n' +
+			'property uchar blue\n' +
+			'property uchar green\n' +
+			'property uchar red\n' + 
+			'property uchar alpha\n' +
+			'end_header\n'
+		)
+
+		# Writes vertices
+		for vertex in vertex_list:
+			v = [str(v) for v in vertex]
+			line = ' '.join(v) + '\n'
+			pf.write(line)
+
+	# Return ply path
+	return ply_path
+
+def keypoints_3D_to_2D(kp_list, cam_K):
+	kp_2d_list = []
+	for kp in kp_list:
+		kp_temp = (kp / kp[-1]).reshape((3,1))
+		kp_2d = np.matmul(cam_K, kp_temp)
+		x, y = kp_2d[0] * kp_2d[2], kp_2d[1] * kp_2d[2]
+		kp_2d_list.append([x,y])
+
+	return np.asarray(kp_2d_list)
+
+def depth_to_ply(depth_img_path, rgb_img_path, cam_K, depth_scale):
+	# Opens depth img and gets info
+	bgr_img = cv2.imread(rgb_img_path, -1)
+	depth_img = cv2.imread(depth_img_path, -1)
+	height, width = img_depth.shape[:2]
+
+	# Goes through all the pixels and adds all !0 vectors
+	vertex_list = []
+	for y in range(height):
+		for x in range(width):
+			# Gets RGB as opencv BGR and depth in millimeters
+			B, G, R = bgr_img[y, x]
+			Z = depth_img[y, x] * depth_scale
+
+			# If Z == 0, fuck it
+			if Z != 0:
+				X = (x - cx) * Z / fx
+				Y = (y - cy) * Z / fy
+				alpha = 0
+				vertex_list.append((X, Y, Z, B, G, R, alpha))
+
+	return vertex_list
+
 # Main
 def main():
 	# Args
@@ -325,7 +398,7 @@ def main():
 	print('Found directories.')
 
 	# Gets the rest of dirs and files we need from train dirs
-	depth_dir_list, rgb_dir_list, gt_list, info_list, rt_dir_list, kp_dir_list, ply_dir_list, cuboid_dir_list = find_files(train_dir_list)
+	depth_dir_list, rgb_dir_list, gt_list, info_list, rt_dir_list, kp_dir_list, ply_dir_list, kp_list = find_files(train_dir_list)
 	print('Found files')
 
 	# Create object model ply dictionary
@@ -335,7 +408,7 @@ def main():
 	# Converts all in gt
 	time_start = time.time()
 	print('\nStarting conversions...\n')
-	for gt_path, kp_dir, rt_dir, ply_dir, info_dir, cuboid_dir, depth_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list, cuboid_dir_list, depth_dir_list):
+	for gt_path, kp_dir, rt_dir, ply_dir, info_path, kp_yml_path, depth_dir, rgb_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list, kp_list, depth_dir_list, rgb_dir_list):
 		# Display
 		print(f'Starting: {gt_path}')
 
@@ -347,17 +420,39 @@ def main():
 		if dataset_name == 'train':
 			dataset_name = 'tudlight'
 
+		# Keypoint dictionary
+		kp_dict = {}
+
 		# Opens ground truth and goes through frames
 		header_list, vertex_array, model_info = [None]*3
 		model_path_prev, keypoint_array = [None]*2
-		with open(gt_path) as gtf:
+		with open(gt_path) as gtf, open(info_path) as inp:
 			# Loads gt
 			gt_dict = yaml.load(gtf)
+
+			# Loads camera intrinsic info
+			info_dict = yaml.load(inp)
 
 			# Goes through gt dict
 			for frame_num, frame_list in gt_dict.items():
 				# Gets dict, only one element and always zero
 				frame_dict = frame_list[0]
+				info_frame_dict = info_dict[int(frame_num)]
+
+				# Gets camera instrinsics for frame
+				cam_K = np.asarray(info_frame_dict['cam_K']).reshape((3,3))
+				depth_scale = info_frame_dict['depth_scale']
+
+				# creates and saves ply from depth map/image
+				ply_path = os.path.join(ply_dir, str(frame_num).zfill(4) + '.ply')
+				if os.path.exists(ply_path):
+					print(f'Already Exists, Skipping... {ply_path}')
+				else:
+					depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(4) + '.png')
+					rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(4) + '.png')
+					ply_points = depth_to_ply(depth_img_path, rgb_img_path, cam_K.flatten(), depth_scale)
+					write_ply(ply_points, ply_path)
+					print(f'{ply_path}: Complete')
 
 				# Gets opject/model info
 				obj_number = int(frame_dict['obj_id'])
@@ -380,25 +475,38 @@ def main():
 				T = np.asarray(frame_dict['cam_t_m2c']).reshape((3,1))
 
 				# Gets path, converts, and saves keypoints rotated/translated
-				kp_path = os.path.join(kp_dir, str(frame_num).zfill(4) + '.ply')
-				if os.path.exists(kp_path):
-					print(f'Already Exists, Skipping... {kp_path}')
-					continue
+				kp_ply_path = os.path.join(kp_dir, str(frame_num).zfill(4) + '.ply')
+				kp_3d = rt_kp(keypoint_array, R, T)
+				if os.path.exists(kp_ply_path):
+					print(f'Already Exists, Skipping... {kp_ply_path}')
 				else:
-					kp_to_save = rt_kp(keypoint_array, R, T)
-					write_ply_keypoints(kp_to_save, kp_path)
+					write_ply_keypoints(kp_3d, kp_ply_path)
+					print(f'{kp_ply_path}: Complete')
 
 				# Gets path, converts, and saves rotated/translated model ply
 				rt_path = os.path.join(rt_dir, str(frame_num).zfill(4) + '.ply')
 				if os.path.exists(rt_path):
 					print(f'Already Exists, Skipping... {rt_path}')
-					continue
 				else:
 					rt_to_save = rt_model(vertex_array, R, T)
 					write_ply_model(rt_to_save, rt_path)
+					print(f'{rt_path}: Complete')
+				
+				# Makes keypoint dict
+				kp_2d = keypoints_3D_to_2D(kp_3d, cam_K)
+				kp_dict.update({
+					int(frame_num) : {
+						'3d' : kp_3d.tolist(),
+						'2d' : kp_2d.tolist()
+					}
+				})
 
-				# Displays status
-				print(f'{kp_path}: Complete')
+			# Saves keypoint dict as yml
+			# if os.path.exists(kp_yml_path):
+			# 	print(f'Already Exists, Skipping... {kp_yml_path}')
+			with open(kp_yml_path, 'w') as kpf:
+				yaml.dump(kp_dict, kpf, default_flow_style=True)
+				print(f'{kp_yml_path}: Complete')
 
 		# Display
 		print(f'Completed: {gt_path}\n')

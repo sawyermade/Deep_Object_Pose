@@ -1,4 +1,4 @@
-import os, sys, yaml, numpy as np, time, cv2
+import os, sys, yaml, numpy as np, time, cv2, argparse
 
 # DEBUG
 DEBUG = False
@@ -366,7 +366,8 @@ def depth_to_ply(depth_img_path, rgb_img_path, cam_K, depth_scale):
 	# Opens depth img and gets info
 	bgr_img = cv2.imread(rgb_img_path, -1)
 	depth_img = cv2.imread(depth_img_path, -1)
-	height, width = img_depth.shape[:2]
+	height, width = depth_img.shape[:2]
+	fx, _, cx, _, fy, cy, _, _, _ = cam_K
 
 	# Goes through all the pixels and adds all !0 vectors
 	vertex_list = []
@@ -502,10 +503,9 @@ def main():
 				})
 
 			# Saves keypoint dict as yml
-			# if os.path.exists(kp_yml_path):
-			# 	print(f'Already Exists, Skipping... {kp_yml_path}')
+			if os.path.exists(kp_yml_path):
+				print(f'Already Exists, Skipping... {kp_yml_path}')
 			with open(kp_yml_path, 'w') as kpf:
-				# yaml.dump(kp_dict, kpf, default_flow_style=True)
 				yaml.dump(kp_dict, kpf)
 				print(f'{kp_yml_path}: Complete')
 

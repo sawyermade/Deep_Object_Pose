@@ -390,7 +390,7 @@ def depth_to_ply(depth_img_path, rgb_img_path, cam_K, depth_scale):
 def main():
 	# Args, needs -d /path/to/dataset. the rest are optional, only makes kp.yml by default
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-d', '--directory', help='Path to dataset dir', type=str)
+	parser.add_argument('-d', '--directory', help='*REQUIRED* Path to dataset dir', type=str)
 	parser.add_argument('-p', '--ply', help='Depth image to ply point cloud?', default=False, action='store_true')
 	parser.add_argument('-r', '--rt', help='Rotate and translate ply object model?', default=False, action='store_true')
 	parser.add_argument('-k', '--kp', help='Create rotated and translated keypoint ply?', default=False, action='store_true')

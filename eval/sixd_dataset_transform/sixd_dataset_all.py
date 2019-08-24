@@ -527,9 +527,10 @@ def main():
 
 	# Completed
 	time_total = int(time.time() - time_start)
-	time_hours = int(time_total // 60**2)
-	time_minutes = int(time_total // 60)
 	time_seconds = int(time_total % 60)
+	time_minutes = int(time_total // 60)
+	time_hours = int(time_minutes // 60)
+	time_minutes = int(time_minutes % 60)
 	print(f'Conversions Completed: {str(time_hours).zfill(2)}:{str(time_minutes).zfill(2)}:{str(time_seconds).zfill(2)}')
 
 if __name__ == '__main__':

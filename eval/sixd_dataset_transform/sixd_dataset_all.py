@@ -384,6 +384,7 @@ def main():
 	parser.add_argument('-p', '--ply', help='Depth image to ply point cloud?', default=False, action='store_true')
 	parser.add_argument('-r', '--rt', help='Rotate and translate ply object model?', default=False, action='store_true')
 	parser.add_argument('-k', '--kp', help='Create rotated and translated keypoint ply?', default=False, action='store_true')
+	parser.add_argument('-o', '--overwrite', help='Overwrite if exists?', default=False, action='store_true')
 	args = parser.parse_args()
 
 	# Checks required args are there
@@ -455,7 +456,7 @@ def main():
 					depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(zfill) + '.png')
 					rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(zfill) + '.png')
 					ply_path = os.path.join(ply_dir, str(frame_num).zfill(zfill) + '.ply')
-					if os.path.exists(ply_path):
+					if os.path.exists(ply_path) and not args.overwrite:
 						print(f'Already Exists, Skipping... {ply_path}')
 					else:
 						ply_points = depth_to_ply(depth_img_path, rgb_img_path, cam_K.flatten(), depth_scale)
@@ -486,7 +487,7 @@ def main():
 				kp_3d = rt_kp(keypoint_array, R, T)
 				if args.kp:
 					kp_ply_path = os.path.join(kp_dir, str(frame_num).zfill(zfill) + '.ply')
-					if os.path.exists(kp_ply_path):
+					if os.path.exists(kp_ply_path) and not args.overwrite:
 						print(f'Already Exists, Skipping... {kp_ply_path}')
 					else:
 						write_ply_keypoints(kp_3d, kp_ply_path)
@@ -495,7 +496,7 @@ def main():
 				# Gets path, converts, and saves rotated/translated model ply
 				if args.rt:
 					rt_path = os.path.join(rt_dir, str(frame_num).zfill(zfill) + '.ply')
-					if os.path.exists(rt_path):
+					if os.path.exists(rt_path) and not args.overwrite:
 						print(f'Already Exists, Skipping... {rt_path}')
 					else:
 						rt_to_save = rt_model(vertex_array, R, T)
@@ -512,8 +513,7 @@ def main():
 				})
 
 			# Saves keypoint dict as yml
-			# if False:
-			if os.path.exists(kp_yml_path):
+			if os.path.exists(kp_yml_path) and not args.overwrite:
 				print(f'Already Exists, Skipping... {kp_yml_path}')
 			else:
 				with open(kp_yml_path, 'w') as kpf:

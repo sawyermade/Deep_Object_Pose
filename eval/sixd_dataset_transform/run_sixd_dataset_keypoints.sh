@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 sixd_dataset_keypoints.py ~/DATASETS/linemod_plus/
+python3 sixd_dataset_keypoints.py ~/DATASETS/sixd_2017

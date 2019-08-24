@@ -15,6 +15,10 @@ def find_dirs(data_dir):
 				if d == 'train':
 					train_dir_list.append(os.path.join(root, d))
 
+				# If train_render directory
+				if d == 'train_render':
+					train_dir_list.append(os.path.join(root, d))
+
 				# If models directory
 				if d == 'models':
 					models_dir_list.append(os.path.join(root, d))

@@ -453,7 +453,6 @@ def main():
 
 				# creates and saves ply from depth map/image
 				if args.ply:
-					depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(zfill) + '.png')
 					rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(zfill) + '.png')
 					ply_path = os.path.join(ply_dir, str(frame_num).zfill(zfill) + '.ply')
 					if os.path.exists(ply_path) and not args.overwrite:

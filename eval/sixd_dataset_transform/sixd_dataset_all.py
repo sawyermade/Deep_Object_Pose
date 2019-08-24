@@ -153,6 +153,58 @@ def make_models_dict(models_dir_list):
 	# Returns model dict of paths, dict[dataset_name][obj_number]
 	return models_dict
 
+def depth_to_ply(depth_img_path, rgb_img_path, cam_K, depth_scale):
+	# Opens depth img and gets info
+	bgr_img = cv2.imread(rgb_img_path, -1)
+	depth_img = cv2.imread(depth_img_path, -1)
+	height, width = depth_img.shape[:2]
+	fx, _, cx, _, fy, cy, _, _, _ = cam_K
+
+	# Goes through all the pixels and adds all !0 vectors
+	vertex_list = []
+	for y in range(height):
+		for x in range(width):
+			# Gets RGB as opencv BGR and depth in millimeters
+			B, G, R = bgr_img[y, x]
+			Z = depth_img[y, x] * depth_scale
+
+			# If Z == 0, fuck it
+			if Z != 0:
+				X = (x - cx) * Z / fx
+				Y = (y - cy) * Z / fy
+				alpha = 0
+				vertex_list.append((X, Y, Z, B, G, R, alpha))
+
+	return vertex_list
+
+# Writes ply file
+def write_ply(vertex_list, ply_path):
+	# Writes ply
+	with open(ply_path, 'w') as pf:
+		# Writes header
+		pf.write(
+			'ply\n' +
+			'format ascii 1.0\n' +
+			f'element vertex {len(vertex_list)}\n' +
+			'property float x\n' +
+			'property float y\n' +
+			'property float z\n' +
+			'property uchar blue\n' +
+			'property uchar green\n' +
+			'property uchar red\n' + 
+			'property uchar alpha\n' +
+			'end_header\n'
+		)
+
+		# Writes vertices
+		for vertex in vertex_list:
+			v = [str(v) for v in vertex]
+			line = ' '.join(v) + '\n'
+			pf.write(line)
+
+	# Return ply path
+	return ply_path
+
 # Reads model plys 
 def read_ply_model(ply_path):
 	# Opens model ply
@@ -314,48 +366,6 @@ def write_ply_model(vertex_array, ply_path):
 	# Returns true if complete
 	return True
 
-# Writes ply file
-def write_ply(vertex_list, ply_path):
-	# Creates ply path
-	# img_dir, img_fname = os.path.split(img_path)
-	# img_number, img_ext = img_fname.rsplit('.', 1)
-	# ply_dir = os.path.join(os.path.split(img_dir)[0], 'ply')
-	# ply_path = os.path.join(ply_dir, f'{img_number}.ply')
-
-	# Creates ply dir if !exists
-	# if not os.path.exists(ply_dir):
-	# 	os.makedirs(ply_dir)
-
-	# Checks if ply file exists
-	# if os.path.exists(ply_path):
-	# 	return ply_path
-
-	# Writes ply
-	with open(ply_path, 'w') as pf:
-		# Writes header
-		pf.write(
-			'ply\n' +
-			'format ascii 1.0\n' +
-			f'element vertex {len(vertex_list)}\n' +
-			'property float x\n' +
-			'property float y\n' +
-			'property float z\n' +
-			'property uchar blue\n' +
-			'property uchar green\n' +
-			'property uchar red\n' + 
-			'property uchar alpha\n' +
-			'end_header\n'
-		)
-
-		# Writes vertices
-		for vertex in vertex_list:
-			v = [str(v) for v in vertex]
-			line = ' '.join(v) + '\n'
-			pf.write(line)
-
-	# Return ply path
-	return ply_path
-
 def keypoints_3D_to_2D(kp_list, cam_K):
 	kp_2d_list = []
 	for kp in kp_list:
@@ -365,30 +375,6 @@ def keypoints_3D_to_2D(kp_list, cam_K):
 		kp_2d_list.append([int(x),int(y)])
 
 	return np.asarray(kp_2d_list)
-
-def depth_to_ply(depth_img_path, rgb_img_path, cam_K, depth_scale):
-	# Opens depth img and gets info
-	bgr_img = cv2.imread(rgb_img_path, -1)
-	depth_img = cv2.imread(depth_img_path, -1)
-	height, width = depth_img.shape[:2]
-	fx, _, cx, _, fy, cy, _, _, _ = cam_K
-
-	# Goes through all the pixels and adds all !0 vectors
-	vertex_list = []
-	for y in range(height):
-		for x in range(width):
-			# Gets RGB as opencv BGR and depth in millimeters
-			B, G, R = bgr_img[y, x]
-			Z = depth_img[y, x] * depth_scale
-
-			# If Z == 0, fuck it
-			if Z != 0:
-				X = (x - cx) * Z / fx
-				Y = (y - cy) * Z / fy
-				alpha = 0
-				vertex_list.append((X, Y, Z, B, G, R, alpha))
-
-	return vertex_list
 
 # Main
 def main():
@@ -429,10 +415,10 @@ def main():
 		# Splits gt_file path
 		gt_split = gt_path.split(os.sep)
 
-		# Gets dataset name, tudlight has refined directory this takes care of
+		# Gets dataset name
 		dataset_name = gt_split[-4]
-		if dataset_name == 'train':
-			dataset_name = 'tudlight'
+		# if dataset_name == 'train':
+		# 	dataset_name = 'tudlight'
 
 		# Keypoint dictionary
 		kp_dict = {}
@@ -457,14 +443,21 @@ def main():
 				cam_K = np.asarray(info_frame_dict['cam_K']).reshape((3,3))
 				depth_scale = info_frame_dict['depth_scale']
 
+				# Have to do this bc damn tudlight is all fucked up, not standardized like the rest
+				zfill = 4
+				depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(zfill) + '.png')
+				while not os.path.exists(depth_img_path):
+					zfill += 1
+					depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(zfill) + '.png')
+
 				# creates and saves ply from depth map/image
 				if args.ply:
-					ply_path = os.path.join(ply_dir, str(frame_num).zfill(4) + '.ply')
+					depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(zfill) + '.png')
+					rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(zfill) + '.png')
+					ply_path = os.path.join(ply_dir, str(frame_num).zfill(zfill) + '.ply')
 					if os.path.exists(ply_path):
 						print(f'Already Exists, Skipping... {ply_path}')
 					else:
-						depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(4) + '.png')
-						rgb_img_path = os.path.join(rgb_dir, str(frame_num).zfill(4) + '.png')
 						ply_points = depth_to_ply(depth_img_path, rgb_img_path, cam_K.flatten(), depth_scale)
 						write_ply(ply_points, ply_path)
 						print(f'{ply_path}: Complete')
@@ -492,7 +485,7 @@ def main():
 				# Gets path, converts, and saves keypoints rotated/translated
 				kp_3d = rt_kp(keypoint_array, R, T)
 				if args.kp:
-					kp_ply_path = os.path.join(kp_dir, str(frame_num).zfill(4) + '.ply')
+					kp_ply_path = os.path.join(kp_dir, str(frame_num).zfill(zfill) + '.ply')
 					if os.path.exists(kp_ply_path):
 						print(f'Already Exists, Skipping... {kp_ply_path}')
 					else:
@@ -501,7 +494,7 @@ def main():
 
 				# Gets path, converts, and saves rotated/translated model ply
 				if args.rt:
-					rt_path = os.path.join(rt_dir, str(frame_num).zfill(4) + '.ply')
+					rt_path = os.path.join(rt_dir, str(frame_num).zfill(zfill) + '.ply')
 					if os.path.exists(rt_path):
 						print(f'Already Exists, Skipping... {rt_path}')
 					else:

@@ -519,6 +519,7 @@ def main():
 				})
 
 			# Saves keypoint dict as yml
+			# if False:
 			if os.path.exists(kp_yml_path):
 				print(f'Already Exists, Skipping... {kp_yml_path}')
 			else:

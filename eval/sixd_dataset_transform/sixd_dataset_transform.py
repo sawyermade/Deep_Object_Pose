@@ -418,8 +418,6 @@ def main():
 
 		# Gets dataset name
 		dataset_name = gt_split[-4]
-		# if dataset_name == 'train':
-		# 	dataset_name = 'tudlight'
 
 		# Keypoint dictionary
 		kp_dict = {}

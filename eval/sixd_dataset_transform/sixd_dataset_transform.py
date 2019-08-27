@@ -397,7 +397,6 @@ def main():
 	print('Created models dictionary')
 	
 	# Converts all in gt
-	time_start = time.time()
 	print('\nStarting conversions...\n')
 	for gt_path, kp_dir, rt_dir, ply_dir, info_path, kp_yml_path, depth_dir, rgb_dir in zip(gt_list, kp_dir_list, rt_dir_list, ply_dir_list, info_list, kp_list, depth_dir_list, rgb_dir_list):
 		# Display
@@ -509,14 +508,13 @@ def main():
 
 		# Display
 		print(f'Completed: {gt_path}\n')
-
-	# Completed
+	
+if __name__ == '__main__':
+	time_start = time.time()
+	main()
 	time_total = int(time.time() - time_start)
 	time_seconds = int(time_total % 60)
 	time_minutes = int(time_total // 60)
 	time_hours = int(time_minutes // 60)
 	time_minutes = int(time_minutes % 60)
 	print(f'Conversions Completed: {str(time_hours).zfill(2)}:{str(time_minutes).zfill(2)}:{str(time_seconds).zfill(2)}')
-
-if __name__ == '__main__':
-	main()

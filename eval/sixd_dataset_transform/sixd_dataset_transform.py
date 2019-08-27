@@ -1,8 +1,5 @@
 import os, sys, yaml, numpy as np, time, cv2, argparse
 
-# DEBUG
-DEBUG = False
-
 # Gets all train directories
 def find_dirs(data_dir):
 	# Creates a list of paths to all train directories
@@ -217,7 +214,6 @@ def read_ply_model(ply_path):
 			# Strips line endings
 			l = line.strip(os.linesep)
 			header_list.append(l)
-			if DEBUG: print(l)
 
 			# If end of header
 			if l.startswith('end_header'):
@@ -226,32 +222,26 @@ def read_ply_model(ply_path):
 			# Gets vertex count
 			elif l.startswith('element vertex'):
 				vertex_count = int(l.split(' ')[-1])
-				if DEBUG: print(f'vertex_count = {vertex_count}')
 
 		# Goes through vertices
 		l = str()
 		for count, line in enumerate(pf):
 			# Checks if less than num vertices
 			if not count < vertex_count:
-				if DEBUG: print(f'{count}: {l}')
 				if l: line_list = [float(v) for v in l.split(' ')[:3]] + [int(v) for v in l.split(' ')[6:9]]
-				if DEBUG: print(f'{count}: {line_list}')
 				break
 
 			# Strips line sep and any whitespace
 			l = line.strip(os.linesep).strip(' ')
-			if DEBUG and count % 1000 == 0: print(f'{count}: {l}')
 
 			# Copies vertices to list
 			line_list = [float(v) for v in l.split(' ')]
-			if DEBUG and count % 1000 == 0: print(f'{count}: {line_list}')
 
 			# Adds to vertex_list
 			vertex_list.append(line_list)
 
 		# Converts to numpy
 		vertex_array = np.asarray(vertex_list, dtype=np.float16)
-		if DEBUG: print(f'vertex_array.shape = {vertex_array.shape}')
 
 		# Returns numpy array
 		return header_list, vertex_array

@@ -432,7 +432,7 @@ def main():
 				cam_K = np.asarray(info_frame_dict['cam_K']).reshape((3,3))
 				depth_scale = info_frame_dict['depth_scale']
 
-				# Have to do this bc damn tudlight is all fucked up, not standardized like the rest
+				# Have to do this bc damn tudlight is all jacked up, not standardized like the rest
 				zfill = 4
 				depth_img_path = os.path.join(depth_dir, str(frame_num).zfill(zfill) + '.png')
 				while not os.path.exists(depth_img_path):
